@@ -16,6 +16,11 @@ services:
     links:
       - db
       - redis
+  smtp:
+    image: schickling/mailcatcher
+    ports:
+      - "1080:1080"
+      - "1025:1025"
   db:
     image: postgres:12
     ports:

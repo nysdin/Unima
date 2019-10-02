@@ -56,7 +56,12 @@
         </v-card>
 
         <v-container>
-            <v-btn color="error" block samll :disabled="!card.brand" @click="purchase">購入する</v-btn>
+            <v-btn color="error" block samll 
+                :disabled="!card.brand || loading"
+                :loading="loading"
+                @click="purchase">
+                購入する
+            </v-btn>
         </v-container>
     </div>
 </template>
@@ -68,6 +73,7 @@ export default {
     name: 'PurchaseConfirmation',
     data(){
         return {
+            loading: false,
             product: {
                 id: '',
                 image: '',
@@ -85,6 +91,7 @@ export default {
     },
     methods: {
         purchase(){
+            this.loading = true
             request.post(`api/v1/products/${this.$route.params.id}/trade`, { auth: true })
                 .then(response => {
                     console.log('success')
@@ -92,8 +99,10 @@ export default {
                     const productId = this.product.id
                     this.$store.commit('sendNotification', { recipientId, productId, action: 'purchase' })
                     this.$router.push(`/product/${this.product.id}/trade`, { auth: true })
+                    this.loading = true
                 })
                 .catch(error => {
+                    this.loading = true
                     console.log('error')
                 })
         },

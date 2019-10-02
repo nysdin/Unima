@@ -1,21 +1,28 @@
-version: "3"
+version: "3.7"
+
+x-template: &template
+  build:
+    context: ./backend
+  volumes:
+    - ./backend:/myapp
+    - /myapp/vendor/bundle
+    - /myapp/.bundle
+    - bundle:/usr/local/bundle
+  environment:
+    REDIS_URL: redis://redis:6379
+  links:
+    - db
+    - redis
+
 services:
   backend:
-    build:
-      context: ./backend
+    <<: *template
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
-    volumes:
-      - ./backend:/myapp
-      - /myapp/vendor/bundle
-      - /myapp/.bundle
-      - bundle:/usr/local/bundle
     ports:
       - "3000:3000"
-    environment:
-      REDIS_URL: redis://redis:6379
-    links:
-      - db
-      - redis
+  worker:
+    <<: *template
+    command: bundle exec sidekiq
   smtp:
     image: schickling/mailcatcher
     ports:

@@ -85,8 +85,8 @@ class Api::V1::ProductsController < ApplicationController
         end
 
         if @product.update_attributes(buyer_id: current_api_user.id, status: "trade", traded_at: Time.zone.now)
-            UserMailer.with(buyer: current_api_user, seller: seller, product: @product).purchase.deliver_now
-            UserMailer.with(buyer: current_api_user, seller: seller, product: @product).sold.deliver_now
+            UserMailer.with(buyer: current_api_user, seller: seller, product: @product).purchase.deliver_later(wait: 2.minitues)
+            UserMailer.with(buyer: current_api_user, seller: seller, product: @product).sold.deliver_later(wait: 2.minitues)
             render json: @product
         else
             render json: @product.errors, status: :unprocessable_entity
@@ -102,8 +102,8 @@ class Api::V1::ProductsController < ApplicationController
         end
 
         if @product.update_attributes(buyer_id: nil, status: "open", traded_at: nil)
-            UserMailer.with(buyer: buyer, seller: seller, product: @product).purchase.deliver_now
-            UserMailer.with(buyer: buyer, seller: seller, product: @product).sold.deliver_now
+            UserMailer.with(buyer: buyer, seller: seller, product: @product).purchase.deliver_later(wait: 2.minitues)
+            UserMailer.with(buyer: buyer, seller: seller, product: @product).sold.deliver_later(wait: 2.minitues)
             head :ok
         else
             head :unprocessable_entity

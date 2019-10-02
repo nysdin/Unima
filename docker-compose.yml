@@ -11,6 +11,8 @@ services:
       - bundle:/usr/local/bundle
     ports:
       - "3000:3000"
+    environment:
+      - REDIS_URL: redis://redis:6379
     links:
       - db
       - redis

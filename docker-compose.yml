@@ -9,7 +9,7 @@ x-template: &template
     - /myapp/.bundle
     - bundle:/usr/local/bundle
   environment:
-    REDIS_URL: redis://redis:6379
+    - REDIS_URL=redis://redis:6379
   links:
     - db
     - redis
@@ -22,7 +22,7 @@ services:
       - "3000:3000"
   worker:
     <<: *template
-    command: bundle exec sidekiq
+    command: bundle exec sidekiq -C config/sidekiq.yml
   smtp:
     image: schickling/mailcatcher
     ports:

@@ -5,7 +5,7 @@
                 delimiter-icon="mdi-minus" :touchless="true"
                 :show-arrows="isHidden">
                 <v-carousel-item v-for="(image, i) in product.images" :key="i">
-                    <v-img :src="image.url" height="300" aspect-ratio="1" contain></v-img>
+                    <v-img :src="image.url" height="300" contain></v-img>
                 </v-carousel-item>
             </v-carousel>
             <v-container class="pt-0">

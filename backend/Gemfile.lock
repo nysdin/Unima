@@ -54,6 +54,7 @@ GEM
       activemodel (>= 4.0.0)
       activesupport (>= 4.0.0)
       mime-types (>= 1.16)
+    chronic (0.10.2)
     coderay (1.1.2)
     concurrent-ruby (1.1.5)
     connection_pool (2.2.2)
@@ -216,6 +217,8 @@ GEM
     websocket-driver (0.7.1)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.4)
+    whenever (1.0.0)
+      chronic (>= 0.6.3)
 
 PLATFORMS
   ruby
@@ -247,6 +250,7 @@ DEPENDENCIES
   spring-watcher-listen (~> 2.0.0)
   stripe
   tzinfo-data
+  whenever
 
 RUBY VERSION
    ruby 2.5.0p0

@@ -22,6 +22,9 @@ const user = {
         },
         avatar(state){
             return state.user.avatar
+        },
+        cancelCount(state){
+            return state.user.cancel_count
         }
     },
     mutations: {

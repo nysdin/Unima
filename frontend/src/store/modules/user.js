@@ -8,6 +8,7 @@ const user = {
             email: '',
             provider: '',
             uid: '',
+            cancel_count: 0,
             id: 0,
             avatar: { url: '' }
         }
@@ -25,12 +26,12 @@ const user = {
     },
     mutations: {
         setUser(state, userData){
-            const { name, email, provider, uid, id, avatar } = userData
-            state.user = { name, email, provider, uid, id, avatar }
+            const { name, email, provider, uid, id, avatar, cancel_count } = userData
+            state.user = { name, email, provider, uid, id, avatar, cancel_count }
             state.user.avatar.url = avatar.url
         },
         removeUser(state){
-            const user = { name: '', email: '', provider: '', uid: '', id: 0, avatar: { url: '' } }
+            const user = { name: '', email: '', provider: '', uid: '', id: 0, cancel_count: 0, avatar: { url: '' } }
             state.user = user
         }
     },

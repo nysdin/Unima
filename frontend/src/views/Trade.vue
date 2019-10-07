@@ -98,6 +98,33 @@
             </v-card>
         </template>
 
+        <div class="text-center pb-2">
+            <a @click="cancelDialog = true">取引をキャンセルする</a>
+        </div>
+
+        <v-dialog v-model="cancelDialog">
+            <v-card>
+                <v-card-title>
+                    <p class="text-center ma-0" style="width:100%;">取引のキャンセル</p>
+                </v-card-title>
+                <v-divider></v-divider>
+                <v-card-text>
+                    <div class="text-center" style="width: 100%;">
+                        <p class="ma-0 subtitle-1">
+                            取引のキャンセルができる回数は<br/>毎月５回までです。
+                        </p>
+                        <span class="body-2">※今月の残り回数は<span style="color: red;">{{ cancelCount }}回</span></span>
+                    </div>
+                </v-card-text>
+                <v-card-actions>
+                    <div class="d-flex justify-center" style="width:100%;">
+                        <v-btn color="blue darken-1" text @click="cancelDialog = false">閉じる</v-btn>
+                        <v-btn color="error" text @click="cancelTrade">取引をキャンセルする</v-btn>
+                    </div>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
         <v-card tile flat>
             <v-sheet tile color="grey lighten-3" class="d-flex align-center" height="30">
                 <v-container>
@@ -147,6 +174,7 @@
 
 <script>
 import request from '../utils/api.js'
+import { mapGetters } from 'vuex'
 
 export default {
     name: 'Trade',
@@ -154,6 +182,7 @@ export default {
         return {
             loading: false,
             isHidden: true,
+            cancelDialog: false,
             product: {
                 seller: {
                     name: '',
@@ -173,6 +202,7 @@ export default {
         }
     },
     computed: {
+        ...mapGetters('user', ['cancelCount']),
         favoriteColor(){
             return this.liked ? 'red' : 'grey'
         },
@@ -236,6 +266,9 @@ export default {
                 .catch(error => {
                     console.log('error comment')
                 })
+        },
+        cancelTrade(){
+            this.cancelDialog = false
         }
     }
 }

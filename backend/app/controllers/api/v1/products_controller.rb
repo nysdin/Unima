@@ -55,11 +55,17 @@ class Api::V1::ProductsController < ApplicationController
 
     def update
         head :forbidden and return if @product.status == "trade" || @product.status == "close"
-        if @product.update(product_params)
+
+        add_more_images(product_images_params[:images]) unless params[:images].nil?
+        
+        remove_image_at_index(params[:remove_ids]) unless params[:remove_ids].nil?
+
+        if @product.update(product_params_except_images)
             render json: @product
         else
             render json: @product.errors, status: :unprocessable_entity
         end
+        
     end
 
     def destroy
@@ -198,6 +204,14 @@ class Api::V1::ProductsController < ApplicationController
             params.permit(:name, :description, :price, :state, { images: [] })
         end
 
+        def product_params_except_images
+            params.permit(:name, :description, :price, :state)
+        end
+
+        def product_images_params
+            params.permit({ images: []})
+        end
+
         def category_params
             params.permit(:category)
         end
@@ -211,4 +225,23 @@ class Api::V1::ProductsController < ApplicationController
             head :forbidden if current_api_user == !@product.seller
         end
 
+        def add_more_images(new_images)
+            images = @product.images 
+            images += new_images
+            @product.images = images
+        end
+
+        def remove_image_at_index(ids)
+            ids.each do |id|
+                index = id.to_i
+                remain_images = @product.images
+                if index == 0 && @product.images.size == 1
+                    @product.remove_images!
+                else
+                    deleted_image = remain_images.delete_at(index) 
+                    deleted_image.try(:remove!)
+                    @product.images = remain_images
+                end
+            end
+        end
 end

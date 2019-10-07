@@ -2,6 +2,13 @@
     <div id="sell">
         <h1>商品の編集</h1>
         <v-container>
+            <v-alert
+                v-model="alert"
+                outlined
+                type="error"
+                dismissible>
+                画像がありません.
+            </v-alert>
             <ValidationObserver v-slot="{ invalid }">
                 <v-form>
                     <v-row>
@@ -9,16 +16,31 @@
                             <v-sheet :width="eachSize" :height="eachSize"
                                 @click="openDialog(i)">
                                     <v-icon class="camera-icon" v-show="i === photoIndex">mdi-camera</v-icon>
-                                <v-img :width="eachSize" :hight="eachSize"
-                                    v-show="previewImages[i]"
-                                    contain :src="previewImages[i]">
+                                <v-img 
+                                    aspect-ratio="1"
+                                    v-show="previewImages[i].url"
+                                    contain
+                                    :src="previewImages[i].url">
                                 </v-img>
                             </v-sheet>
+                            <div class="text-center" v-show="previewImages[i].url">
+                                <v-btn text x-small icon color="success"
+                                    class="mr-3"
+                                    @click="dialogs[i].dialog = true">
+                                    <v-icon>mdi-pencil</v-icon>
+                                </v-btn>
+                                <v-btn 
+                                    text x-small icon color="error"
+                                    @click="removeImage(i)">
+                                    <v-icon>mdi-delete</v-icon>
+                                </v-btn>
+                            </div>
                         </v-col>
                     </v-row>
 
                     <v-dialog v-for="(image, i) in images"
-                        v-model="dialogs[i].dialog" :key="i">
+                        v-model="dialogs[i].dialog" :key="i"
+                        persistent>
                         <v-card>
                             <div class="d-flex justify-center">
                                 <v-card-title>商品画像を追加</v-card-title>
@@ -27,13 +49,19 @@
                                 <croppa v-model="images[i]"
                                     :width="modalImageSize" :height="modalImageSize"
                                     :placeholder="`画像${i+1}`"
-                                    :initial-image="previewImages[i]"
-                                    :show-remove-button="false"></croppa>
+                                    :initial-image="previewImages[i].url"
+                                    initial-size="contain"
+                                    :show-remove-button="false">
+                                </croppa>
                             </div>
                             <v-card-actions class="d-flex justify-center">
-                                <v-btn text @click="removeImage(i)" v-show="previewImages[i]">削除</v-btn>
-                                <v-btn text @click="cancelImage(i)" v-show="!previewImages[i]">キャンセル</v-btn>
-                                <v-btn text @click="addImage(i)">追加</v-btn>
+                                <v-btn text @click="cancelImage(i)">キャンセル</v-btn>
+                                <v-btn text @click="addImage(i)" v-show="!previewImages[i].url">
+                                    <span>追加</span>
+                                </v-btn>
+                                <v-btn text @click="editImage(i)" v-show="previewImages[i].url">
+                                    <span>完了</span>
+                                </v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -97,6 +125,7 @@ export default {
     data(){
         return{
             loading: false,
+            alert: false,
             photoIndex: 0,
             size: window.innerWidth,
             dialogs: [
@@ -112,7 +141,13 @@ export default {
             },
             category: '',
             images: [{}, {}, {}, {}],
-            previewImages: ['', '', '', ''],
+            previewImages: [
+                { url: '', index: null },
+                { url: '', index: null },
+                { url: '', index: null },
+                { url: '', index: null },
+            ],
+            removeId: [],
             categoris: [ '一般', '文系', '理系'],
             states: ['新品、未使用', '目立った傷や汚れなし', 'やや傷れや汚れあり', '全体的に状態が悪い']
         }
@@ -127,6 +162,11 @@ export default {
     },
     methods: {
         async update(){
+            if(!this.previewImages[0].url){
+                console.log('image empty')
+                this.alert = true
+                return
+            }
             this.loading = true
             const params = new FormData()
             const product = this.product
@@ -143,6 +183,9 @@ export default {
                     if(file)　params.append('images[]', blob, file.name)
                 }
             }
+            this.removeId.forEach( value => {
+                params.append('remove_ids[]', value)
+            })
             request.patch(`/api/v1/products/${this.$route.params.id}`, {
                 params: params,
                 auth: true,
@@ -171,29 +214,42 @@ export default {
         handleResize(){
             this.size = window.innerWidth
         },
-        addImage(index){
+        editImage(index){
             this.dialogs[index].dialog = false
+            const image = this.images[index]
+            const url = image.generateDataUrl()
             const preview = this.previewImages[index]
-            let image = this.images[index]
-            let url = image.generateDataUrl()
-            if(url){
-                Vue.set(this.previewImages, index, url)
-                if(!preview) this.photoIndex++
+            preview.url = url
+            if(preview.index >= 0) {
+                this.removeId.push(preview.index)
+                preview.index = null
+                
             }
             console.log(this.images)
+        },
+        addImage(index){
+            this.dialogs[index].dialog = false
+            const image = this.images[index]
+            if(image.hasImage()){
+                const url = image.generateDataUrl()
+                this.previewImages[index].url = url
+                this.photoIndex++
+            }
+        },
+        removeImage(index){
+            const image = this.images[index]
+            const preview = this.previewImages[index]
+            if(Object.keys(image).length) image.remove()
+            if(preview.index >= 0) this.removeId.push(preview.index)
+            preview.url = ''
+            preview.index = null
+            this.photoIndex--
         },
         cancelImage(index){
             this.dialogs[index].dialog = false
         },
-        removeImage(index){
-            this.dialogs[index].dialog = false
-            let image = this.images[index]
-            image.remove()
-            Vue.set(this.previewImages, index, '')
-            this.photoIndex--
-        },
         openDialog(index){
-            if(index <= this.photoIndex){
+            if(index === this.photoIndex){
                 this.dialogs[index].dialog = true
             }
         }
@@ -207,7 +263,8 @@ export default {
                     const product = response.data.product
                     this.product = product
                     product.images.forEach( (image, index) => {
-                        Vue.set(this.previewImages, index, image.url)
+                        this.previewImages[index].url = image.url
+                        this.previewImages[index].index = index
                         this.photoIndex++
                     })
                     this.$store.commit('auth/apiCompleted')

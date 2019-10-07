@@ -1,5 +1,5 @@
 class AddImagesToProducts < ActiveRecord::Migration[5.2]
   def change
-    add_column :products, :images, :json
+    add_column :products, :images, :string, array: true, default: []
   end
 end

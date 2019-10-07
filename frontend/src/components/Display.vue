@@ -5,9 +5,12 @@
                 <v-col :cols="4" v-for="product in products" :key="product.id">
                     <v-card outlined class="product" @click="showProduct(product.id)">
 
-                        <v-img  aspect-ratio="1"
-                        :src="product.images[0].url"
-                        ></v-img>
+                        <v-img  
+                            aspect-ratio="1"
+                            contain
+                            :src="product.images[0].url"
+                        >
+                        </v-img>
 
                         <v-card-title class="px-1 pt-1 pb-0 font-weight-regular subtitle-2">
                             <p class="omission mb-0">{{ product.name }}</p>

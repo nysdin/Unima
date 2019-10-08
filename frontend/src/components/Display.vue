@@ -3,7 +3,7 @@
         <v-container fluid>
             <v-row dense>
                 <v-col :cols="4" v-for="product in products" :key="product.id">
-                    <v-card outlined class="product" @click="showProduct(product.id)">
+                    <v-card outlined class="product" @click="showProduct(product)">
 
                         <v-img  
                             aspect-ratio="1"
@@ -40,8 +40,12 @@ export default {
     name: 'display',
     props: ['products'],
     methods:{
-        showProduct(id){
-            this.$router.push({ path: `/product/${id}`})
+        showProduct(product){
+            if(product.status === "trade"){
+                this.$router.push({ path: `/product/${product.id}/trade`})
+            }else{
+                this.$router.push({ path: `/product/${product.id}`})
+            }
         },
     }
 }

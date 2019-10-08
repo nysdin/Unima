@@ -36,6 +36,9 @@ const user = {
         removeUser(state){
             const user = { name: '', email: '', provider: '', uid: '', id: 0, cancel_count: 0, avatar: { url: '' } }
             state.user = user
+        },
+        reduceCancelCount(state){
+            state.cancel_count--
         }
     },
     actions: {

@@ -103,16 +103,19 @@ class Api::V1::ProductsController < ApplicationController
     def cancel
         seller = @product.seller
         buyer = @product.buyer
-        unless current_api_user == seller && @product.status == "trade"
+
+        #取引に関係するユーザーではなく、取引中の商品でない場合は403を返す
+        if current_api_user != seller && current_api_user != buyer
             head :forbidden and return
         end
+        head :forbidden and return unless @product.status == "trade"
 
-        if @product.update_attributes(buyer_id: nil, status: "open", traded_at: nil)
-            UserMailer.with(buyer: buyer, seller: seller, product: @product).purchase.deliver_later
-            UserMailer.with(buyer: buyer, seller: seller, product: @product).sold.deliver_later
+        if current_api_user.cancel_count > 0
+            @product.update_attributes(buyer_id: nil, status: "open", traded_at: nil)
+            current_api_user.decrement!(:cancel_count)
             head :ok
         else
-            head :unprocessable_entity
+            head :bad_request
         end
     end
 

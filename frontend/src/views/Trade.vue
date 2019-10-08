@@ -268,6 +268,15 @@ export default {
                 })
         },
         cancelTrade(){
+            if(this.cancelCount === 0) return
+            request.post(`/api/v1/products/${this.product.id}/cancel`, { auth: true })
+                .then(response => {
+                    this.$store.commit('user/reduceCancelCount')
+                    this.$router.push(`/product/${this.product.id}`)
+                })
+                .catch(error => {
+                    console.log('error')
+                })
             this.cancelDialog = false
         }
     }

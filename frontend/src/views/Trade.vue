@@ -113,13 +113,25 @@
                         <p class="ma-0 subtitle-1">
                             取引のキャンセルができる回数は<br/>毎月５回までです。
                         </p>
-                        <span class="body-2">※今月の残り回数は<span style="color: red;">{{ cancelCount }}回</span></span>
+                        <span class="body-2">
+                            ※今月の残り回数は<span style="color: red;">{{ cancelCount }}回</span><br>
+                            <span v-if="!canBeCanceled">
+                                今月のキャンセル回数が上限を満たしています.<br>
+                                正当な理由でキャンセルを望む場合は<br>下記ボタンより運営にお問い合わせください.
+                            </span>
+                        </span>
                     </div>
                 </v-card-text>
+                <v-divider></v-divider>
                 <v-card-actions>
                     <div class="d-flex justify-center" style="width:100%;">
-                        <v-btn color="blue darken-1" text @click="cancelDialog = false">閉じる</v-btn>
-                        <v-btn color="error" text @click="cancelTrade">取引をキャンセルする</v-btn>
+                        <template v-if="canBeCanceled">
+                            <v-btn color="blue darken-1" text @click="cancelDialog = false">閉じる</v-btn>
+                            <v-btn color="error" text @click="cancelTrade">取引をキャンセルする</v-btn>
+                        </template>
+                        <template v-else>
+                            <v-btn color="blue darken-1" text　@click="sendCancelRequest">キャンセルを申し込む</v-btn>
+                        </template>
                     </div>
                 </v-card-actions>
             </v-card>
@@ -215,6 +227,9 @@ export default {
         },
         isSeller(){
             return this.product.seller_id === this.$store.state.user.user.id
+        },
+        canBeCanceled(){
+            return this.cancelCount > 0
         }
     },
     created(){
@@ -278,6 +293,9 @@ export default {
                     console.log('error')
                 })
             this.cancelDialog = false
+        },
+        sendCancelRequest(){
+            console.log('send')
         }
     }
 }
